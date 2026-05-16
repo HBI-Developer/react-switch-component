@@ -7,6 +7,7 @@ A **zero-dependency**, simple, and native-like Switch component for React. It wo
 - 🚀 **Zero Dependencies**: Lightweight and fast.
 - 🧩 **Declarative API**: Read your logic as if it were code.
 - 🛠 **Flexible Layouts**: Wrap matched cases in a custom container with `Switch.Layout`.
+- ⏱️ **Delayed Switches**: Add delays before changing the rendered component to handle transitions seamlessly.
 - ⌨️ **TypeScript Support**: Full type definitions included.
 - 📦 **Modern**: Works with React 16.8+ (including React 19).
 
@@ -28,21 +29,27 @@ yarn add @hbi-developer/react-switch-component
 ```tsx
 import { Switch } from "@hbi-developer/react-switch-component";
 
-const MyComponent = ({ status }: { status: 'loading' | 'success' | 'error' }) => {
+const MyComponent = ({
+  status,
+}: {
+  status: "loading" | "success" | "error";
+}) => {
   return (
-    <Switch>
-      <Switch.Case condition={status === 'loading'}>
+    <Switch.Root>
+      <Switch.Case condition={status === "loading"}>
         <p>Loading...</p>
       </Switch.Case>
-      
-      <Switch.Case condition={status === 'success'}>
+
+      <Switch.Case condition={status === "success"}>
         <p>Data loaded successfully!</p>
       </Switch.Case>
-      
-      <Switch.Default>  {/* Optional Component */}
+
+      <Switch.Default>
+        {" "}
+        {/* Optional Component */}
         <p>Something went wrong.</p>
       </Switch.Default>
-    </Switch>
+    </Switch.Root>
   );
 };
 ```
@@ -52,7 +59,7 @@ const MyComponent = ({ status }: { status: 'loading' | 'success' | 'error' }) =>
 You can use `Switch.Layout` to wrap the matched content in a specific component (like a `Motion` div or a styled container).
 
 ```tsx
-<Switch>
+<Switch.Root>
   <Switch.Layout withDefault={true}>
     <div className="card-container" />
   </Switch.Layout>
@@ -64,43 +71,89 @@ You can use `Switch.Layout` to wrap the matched content in a specific component 
   <Switch.Default>
     <UserPanel />
   </Switch.Default>
-</Switch>
+</Switch.Root>
 ```
 
 > [!NOTE]
 > The `children` of `Switch.Layout` should be a single React element that will receive the matched case content as its own `children`.
 
+## Advanced Usage: Delaying Switches
+
+You can add a `delay` prop to `Switch` to delay the rendering of components when conditions change. This is especially useful for coordinating exit and enter animations.
+
+```tsx
+<Switch.Root delay={300}>
+  {" "}
+  {/* 300ms delay before switching to any matched case */}
+  <Switch.Case condition={status === "loading"}>
+    <LoadingSpinner />
+  </Switch.Case>
+  <Switch.Case condition={status === "success"}>
+    <DataView />
+  </Switch.Case>
+</Switch.Root>
+```
+
+You can also pass an object to define specific delays for each case, where `0` targets the `Switch.Default` and `1`, `2`, etc., target the `Switch.Case` components based on their order.
+
+```tsx
+<Switch.Root delay={{ 0: 0, 1: 200, 2: 500 }}>
+  <Switch.Case condition={status === "success"}>
+    {" "}
+    {/* index 1 */}
+    <SuccessMessage />
+  </Switch.Case>
+
+  <Switch.Case condition={status === "error"}>
+    {" "}
+    {/* index 2 */}
+    <ErrorMessage />
+  </Switch.Case>
+
+  <Switch.Default>
+    {" "}
+    {/* index 0 */}
+    <IdleState />
+  </Switch.Default>
+</Switch.Root>
+```
+
 ## API Reference
 
 ### `Switch` (or `Switch.Root`)
+
 The main container for your switch logic.
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `children` | `ReactNode` | Should contain `Switch.Case`, `Switch.Default`, and optionally `Switch.Layout`. |
+| Prop       | Type                               | Description                                                                           |
+| :--------- | :--------------------------------- | :------------------------------------------------------------------------------------ |
+| `children` | `ReactNode`                        | Should contain `Switch.Case`, `Switch.Default`, and optionally `Switch.Layout`.       |
+| `delay`    | `number \| Record<number, number>` | (Optional) Adds a delay (in ms) before switching between components. Defaults to `0`. |
 
 ### `Switch.Case`
+
 Defines a specific condition and the content to render if it's met.
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `condition` | `boolean` | If `true`, this case is rendered (unless a previous case already matched). |
-| `children` | `ReactNode` | The content to render. |
+| Prop        | Type        | Description                                                                |
+| :---------- | :---------- | :------------------------------------------------------------------------- |
+| `condition` | `boolean`   | If `true`, this case is rendered (unless a previous case already matched). |
+| `children`  | `ReactNode` | The content to render.                                                     |
 
 ### `Switch.Default`
+
 The fallback content if no `Switch.Case` matches.
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
+| Prop       | Type        | Description           |
+| :--------- | :---------- | :-------------------- |
 | `children` | `ReactNode` | The fallback content. |
 
 ### `Switch.Layout`
+
 A special component to define a wrapper for the matched case.
 
-| Prop | Type | Description |
-| :--- | :--- | :--- |
-| `children` | `ReactElement` | The wrapper element. |
-| `withDefault` | `boolean` | (Optional) If `true`, the layout will also wrap the `Switch.Default` content. Defaults to `false`. |
+| Prop          | Type           | Description                                                                                        |
+| :------------ | :------------- | :------------------------------------------------------------------------------------------------- |
+| `children`    | `ReactElement` | The wrapper element.                                                                               |
+| `withDefault` | `boolean`      | (Optional) If `true`, the layout will also wrap the `Switch.Default` content. Defaults to `false`. |
 
 ## License
 
